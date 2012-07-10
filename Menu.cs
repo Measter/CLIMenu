@@ -102,10 +102,13 @@ namespace CLIMenu
 
     private bool m_exiting = false;
     private Size m_size = new Size();
-    private bool m_isShown = false;
+    private bool m_isShown = false;  //Sets whether the window should be resized when rendering.
     private bool m_isScrolling = false;
 
-    private int[] m_firstLast = new int[2];
+    private int[] m_firstLast = new int[2];  //The first and last item IDs for a scrolling menu.
+
+    private const int BORDER_WIDTH = 3;
+    private const int DOUBLE_BORDER_WIDTH = BORDER_WIDTH * 2;
 
     /// <summary>
     /// Creates a new Menu.
@@ -140,6 +143,7 @@ namespace CLIMenu
 
       SetScreenSize();
 
+      //Find the first item ID that isn't in the banned list.
       while( BannedIndices.Contains( SelectedIndex ) )
       {
         SelectedIndex++;
@@ -147,11 +151,9 @@ namespace CLIMenu
           return;
       }
 
-      while( true )
+      //Input and draw loop.
+      while( !m_exiting )
       {
-        if( m_exiting )
-          break;
-
         DrawScreen();
 
         Input();
@@ -160,18 +162,20 @@ namespace CLIMenu
 
     private void SetScreenSize()
     {
-      int temp = 0;
+      int longestItemLength = 0;
 
+      //Find the longest item name.
       foreach( MenuItem item in Items )
-        if( item.Name.Length > temp )
-          temp = item.Name.Length;
+        if( item.Name.Length > longestItemLength )
+          longestItemLength = item.Name.Length;
 
+      //If showing the selected item, add 2 characters to give room for the indicator.
       if( ShowSelected )
-        m_size.Width = temp + 8;
+        m_size.Width = longestItemLength + DOUBLE_BORDER_WIDTH + 2;
       else
-        m_size.Width = temp + 6;
+        m_size.Width = longestItemLength + DOUBLE_BORDER_WIDTH;
 
-      m_size.Height = Items.Count + 6;
+      m_size.Height = Items.Count + DOUBLE_BORDER_WIDTH;
 
       //Size checking.
       if( MinSize.Height > m_size.Height )
@@ -183,7 +187,7 @@ namespace CLIMenu
       }
 
       if( m_isScrolling )
-        m_size.Width++;
+        m_size.Width++; //Add a space for the scroll bar.
 
       if( MinSize.Width > m_size.Width )
         m_size.Width = MinSize.Width;
@@ -228,6 +232,9 @@ namespace CLIMenu
         return;
       }
 
+      //If the new selected index is in the banned list, iterate over them until
+      //an index is found that isn't banned. If the end of the list is reached,
+      //return to the previous index.
       while( BannedIndices.Contains( SelectedIndex ) )
       {
         SelectedIndex++;
@@ -251,6 +258,9 @@ namespace CLIMenu
         return;
       }
 
+      //If the new selected index is in the banned list, iterate over them until
+      //an index is found that isn't banned. If the end of the list is reached,
+      //return to the previous index.
       while( BannedIndices.Contains( SelectedIndex ) )
       {
         SelectedIndex--;
@@ -264,6 +274,8 @@ namespace CLIMenu
 
     private void DrawScreen()
     {
+      //The screen should only be resized if control has been moved away from
+      //the menu.
       if( !m_isShown )
       {
         //Setting the window size.
@@ -293,12 +305,13 @@ namespace CLIMenu
 
     private void DrawScrollBar()
     {
-      float a, c, range = m_size.Height - 7;
+      float a, c, range = m_size.Height - ( DOUBLE_BORDER_WIDTH + 1 );
 
+      //Calculate the position of the scroll bar.
       a = (float)SelectedIndex / (float)( Items.Count - 1 );
       c = a * range;
 
-      Console.SetCursorPosition( m_size.Width - 3, (int)c + 3 );
+      Console.SetCursorPosition( m_size.Width - BORDER_WIDTH, (int)c + BORDER_WIDTH );
       Console.Write( "|" );
     }
 
@@ -306,21 +319,21 @@ namespace CLIMenu
     {
       SetFirstLast();
 
-      int startLine = 3;
+      int drawLine = BORDER_WIDTH;
       for( int i = 0; i < Items.Count; i++ )
       {
         if( i <= m_firstLast[1] && i >= m_firstLast[0] )
         {
-          DrawItem( startLine, i );
+          DrawItem( drawLine, i );
 
-          startLine++;
+          drawLine++;
         }
       }
     }
 
     private void SetFirstLast()
     {
-      int maxItems = m_size.Height - 7;
+      int maxItems = m_size.Height - ( DOUBLE_BORDER_WIDTH + 1 );
 
       if( SelectedIndex == 0 )
       {
@@ -347,29 +360,26 @@ namespace CLIMenu
 
     private void DrawItems()
     {
-      int startLine = 3;
-
       for( int i = 0; i < Items.Count; i++ )
-      {
-        DrawItem( startLine + i, i );
-      }
+        DrawItem( BORDER_WIDTH + i, i );
     }
 
     private void DrawItem( int drawLine, int i )
     {
-      StringBuilder sb;
-      sb = new StringBuilder();
+      StringBuilder sb = new StringBuilder();
       if( ShowSelected )
         sb.Append( i == SelectedIndex && ShowSelected ? " " + SelectionIndicator + " " : "   " );
       else
         sb.Append( " " );
+
       sb.Append( Items[i].Name );
 
+      //Check the length of the name to see if it needs clipping.
       if( sb.Length > m_size.Width - 5 )
       {
         string t = sb.ToString();
         sb = new StringBuilder();
-        sb.Append( t.Substring( 0, m_size.Width - 8 ) );
+        sb.Append( t.Substring( 0, m_size.Width - ( DOUBLE_BORDER_WIDTH + 2 ) ) );
         sb.Append( "..." );
       }
 
@@ -384,7 +394,7 @@ namespace CLIMenu
       //Draw top border
       sb = new StringBuilder();
       sb.Append( BorderChars[0] );
-      sb.Append( "".PadLeft( m_size.Width - 4, BorderChars[4] ) );
+      sb.Append( "".PadLeft( m_size.Width - ( BORDER_WIDTH + 1 ), BorderChars[4] ) );
       sb.Append( BorderChars[1] );
 
       Console.SetCursorPosition( 1, 1 );
@@ -393,19 +403,19 @@ namespace CLIMenu
       //Draw side borders
       for( int i = 2; i < m_size.Height - 1; i++ )
       {
-        Console.SetCursorPosition( 1, i );
+        Console.SetCursorPosition( ( BORDER_WIDTH - 2 ), i );
         Console.Write( BorderChars[5] );
-        Console.SetCursorPosition( m_size.Width - 2, i );
+        Console.SetCursorPosition( m_size.Width - ( BORDER_WIDTH - 1 ), i );
         Console.Write( BorderChars[5] );
       }
 
       //Draw bottom border
       sb = new StringBuilder();
       sb.Append( BorderChars[3] );
-      sb.Append( "".PadLeft( m_size.Width - 4, BorderChars[4] ) );
+      sb.Append( "".PadLeft( m_size.Width - ( BORDER_WIDTH + 1 ), BorderChars[4] ) );
       sb.Append( BorderChars[2] );
 
-      Console.SetCursorPosition( 1, m_size.Height - 2 );
+      Console.SetCursorPosition( 1, m_size.Height - ( BORDER_WIDTH - 1 ) );
       Console.Write( sb.ToString() );
     }
   }
@@ -421,7 +431,7 @@ namespace CLIMenu
     {
       base.AddRange( items );
     }
-    
+
     public new void Insert( int index, MenuItem item )
     {
       base.Insert( index, item );
