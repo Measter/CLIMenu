@@ -215,7 +215,8 @@ namespace CLIMenu
           Items[SelectedIndex].FireClick( cin );
           break;
         default:
-          onOtherButton( this, new onOtherButtonHandlerArgs( Items[SelectedIndex], cin ) );
+          if ( onOtherButton != null )
+            onOtherButton( this, new onOtherButtonHandlerArgs( Items[SelectedIndex], cin ) );
           break;
       }
     }
