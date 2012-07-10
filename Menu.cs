@@ -421,12 +421,7 @@ namespace CLIMenu
     {
       base.AddRange( items );
     }
-
-    public new void Clear()
-    {
-      base.Clear();
-    }
-
+    
     public new void Insert( int index, MenuItem item )
     {
       base.Insert( index, item );
@@ -445,16 +440,6 @@ namespace CLIMenu
     public new void RemoveAll( Predicate<MenuItem> match )
     {
       base.RemoveAll( match );
-    }
-
-    public new void RemoveAt( int index )
-    {
-      base.RemoveAt( index );
-    }
-
-    public new void RemoveRange( int index, int count )
-    {
-      base.RemoveRange( index, count );
     }
   }
 
