@@ -209,6 +209,7 @@ namespace CLIMenu
           break;
         case ConsoleKey.Escape:
           m_exiting = true;
+          m_isShown = false;
           break;
         case ConsoleKey.Enter:
           m_isShown = false;
