@@ -85,7 +85,11 @@ namespace CLIMenu
     /// <summary>
     /// The character used to indicate the scrollbar postion.
     /// </summary>
-    public Char ScrollbarCharacter { get; set; }
+    public Char ScrollbarCharacter
+    {
+      get;
+      set;
+    }
     /// <summary>
     /// A list of item indices that should be skipped over.
     /// </summary>
@@ -95,14 +99,6 @@ namespace CLIMenu
       private set;
     }
 
-    /// <summary>
-    /// This event is fired if a button is pressed that is not one of the following:
-    /// <para>Up Arrow</para>
-    /// <para>Down Arrow</para>
-    /// <para>Escape</para>
-    /// <para>Enter</para>
-    /// </summary>
-    public event onOtherButtonHandler onOtherButton;
     /// <summary>
     /// This event is fired after clearing the screen, but before rendering begins.
     /// </summary>
@@ -235,14 +231,9 @@ namespace CLIMenu
           m_exiting = true;
           m_isShown = false;
           break;
-        case ConsoleKey.Enter:
-          if ( Items[SelectedIndex].FireClick( cin ) )
-            m_isShown = false;  //If the event fires, the window may need
-                                //resizing.
-          break;
         default:
-          if( onOtherButton != null )
-            onOtherButton( this, new onOtherButtonHandlerArgs( Items[SelectedIndex], cin ) );
+          if( Items[SelectedIndex].FireKeyPress( this, cin ) )
+            m_isShown = false;  //If the event fires, the window may need resizing.
           break;
       }
     }
@@ -323,7 +314,7 @@ namespace CLIMenu
 
       Console.Clear();
 
-      if ( PreRender != null )
+      if( PreRender != null )
         PreRender( this );
 
       DrawBorder();
@@ -336,7 +327,7 @@ namespace CLIMenu
         DrawScrollBar();
       }
 
-      if ( PostRender != null )
+      if( PostRender != null )
         PostRender( this );
     }
 
@@ -472,21 +463,21 @@ namespace CLIMenu
   /// A menu item for use in the Menu object.
   /// </summary>
   public abstract class MenuItem
-  {                  
+  {
     /// <summary>
     /// This event will fire when the user presses the Enter button on this event.
     /// </summary>
-    public event MenuItemClickedEventHandler onClick;
-    
+    public event MenuItemClickedEventHandler onKeyPress;
+
     /// <summary>
-    /// Fires the onClick event.
+    /// Fires the onKeyPress event.
     /// </summary>
     /// <param name="key">The key used to fire the event.</param>
-    public bool FireClick( ConsoleKeyInfo key )
+    public bool FireKeyPress( Menu sender, ConsoleKeyInfo key )
     {
-      if( onClick != null )
+      if( onKeyPress != null )
       {
-        onClick( this, key );
+        onKeyPress( sender, new onKeyPressArgs( this, key ) );
         return true;
       }
 
@@ -494,15 +485,13 @@ namespace CLIMenu
     }
   }
 
-  public delegate void MenuItemClickedEventHandler( MenuItem item, ConsoleKeyInfo key );
-
-  public delegate void onOtherButtonHandler( Menu sender, onOtherButtonHandlerArgs args );
+  public delegate void MenuItemClickedEventHandler( Menu sender, onKeyPressArgs args );
 
   public delegate void PreRenderHandler( Menu sender );
 
   public delegate void PostRenderHandler( Menu sender );
 
-  public class onOtherButtonHandlerArgs
+  public class onKeyPressArgs
   {
     /// <summary>
     /// The selected menu item at the time the onOtherButton event was fired.
@@ -522,7 +511,7 @@ namespace CLIMenu
       private set;
     }
 
-    public onOtherButtonHandlerArgs( MenuItem menuItem, ConsoleKeyInfo key )
+    public onKeyPressArgs( MenuItem menuItem, ConsoleKeyInfo key )
     {
       MenuItem = menuItem;
       Key = key;

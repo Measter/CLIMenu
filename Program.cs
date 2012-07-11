@@ -70,9 +70,22 @@ namespace CLIMenuExample
       m_mainMenu.Items.Add( new ListItem( "Scrolling List Demo", MainMenu_Scrolling_Click ) );
     }
 
-    private static void MainMenu_Scrolling_Click( MenuItem item, ConsoleKeyInfo key )
+    private static void MainMenu_Scrolling_Click( Menu sender, onKeyPressArgs args )
     {
-      m_scrollingDemo.Show();
+      if( args.Key.Key == ConsoleKey.Enter )
+        m_scrollingDemo.Show();
+    }
+
+    private static void MainMenu_Sum_Click( Menu sender, onKeyPressArgs args )
+    {
+      if( args.Key.Key == ConsoleKey.Enter )
+        m_sumMenu.Show();
+    }
+
+    private static void MainMenu_ListDemo_Click( Menu sender, onKeyPressArgs args )
+    {
+      if ( args.Key.Key == ConsoleKey.Enter )
+        m_listDemoMenu.Show();
     }
 
     private static void SetupSumMenu()
@@ -83,7 +96,8 @@ namespace CLIMenuExample
       m_sumMenu.Items.Add( new ListItem( "" ) );
 
       First = new SumItem( "First Number: " );
-      First.Value= 2 ;
+      First.Value = 2;
+      First.onKeyPress += SumItem_onKeyPress;
       m_sumMenu.Items.Add( First );
 
       Second = new SumItem( "Second Number: " );
@@ -99,14 +113,11 @@ namespace CLIMenuExample
       //Setting the indices of the menu to skip over.
       m_sumMenu.BannedIndices.AddRange( new[] { 0, 1, 4, 5 } );
 
-      //We need to handle incrementing the first and second values.
-      m_sumMenu.onOtherButton += SumMenuOnOnOtherButton;
-
       //We'll set a custom selection indicator for this menu.
       m_sumMenu.SelectionIndicator = '>';
     }
 
-    private static void SumMenuOnOnOtherButton( Menu sender, onOtherButtonHandlerArgs args )
+    private static void SumItem_onKeyPress( Menu sender, onKeyPressArgs args )
     {
       //First we check if the selected index is one we want to handle.
       if( sender.SelectedIndex != 2 &&
@@ -122,32 +133,28 @@ namespace CLIMenuExample
         return;
 
       //Now we handle the input.
-      if ( args.Key.Key == ConsoleKey.LeftArrow )
+      if( args.Key.Key == ConsoleKey.LeftArrow )
         cur.Value--;
 
-      if ( args.Key.Key == ConsoleKey.RightArrow )
+      if( args.Key.Key == ConsoleKey.RightArrow )
         cur.Value++;
 
       Sum.Value = First.Value + Second.Value;
-    }
-
-    private static void MainMenu_Sum_Click( MenuItem item, ConsoleKeyInfo key )
-    {
-      m_sumMenu.Show();
-    }
-
-    //This function handles the user pressing Enter while this menu item is selected.
-    //In this case, we're just showing another menu.
-    private static void MainMenu_ListDemo_Click( MenuItem item, ConsoleKeyInfo key )
-    {
-      m_listDemoMenu.Show();
     }
   }
 
   public class SumItem : MenuItem
   {
-    public string Text { get; set; }
-    public int Value { get; set; }
+    public string Text
+    {
+      get;
+      set;
+    }
+    public int Value
+    {
+      get;
+      set;
+    }
 
     public SumItem( string text )
     {
@@ -180,7 +187,7 @@ namespace CLIMenuExample
     public ListItem( string name, MenuItemClickedEventHandler clickEvent )
     {
       Name = name;
-      onClick += clickEvent;
+      onKeyPress += clickEvent;
     }
 
     public override string ToString()
