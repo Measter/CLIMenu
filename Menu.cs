@@ -228,8 +228,9 @@ namespace CLIMenu
           m_isShown = false;
           break;
         case ConsoleKey.Enter:
-          m_isShown = false;
-          Items[SelectedIndex].FireClick( cin );
+          if ( Items[SelectedIndex].FireClick( cin ) )
+            m_isShown = false;  //If the event fires, the window may need
+                                //resizing.
           break;
         default:
           if( onOtherButton != null )
@@ -467,10 +468,15 @@ namespace CLIMenu
     /// Fires the onClick event.
     /// </summary>
     /// <param name="key">The key used to fire the event.</param>
-    public void FireClick( ConsoleKeyInfo key )
+    public bool FireClick( ConsoleKeyInfo key )
     {
       if( onClick != null )
+      {
         onClick( this, key );
+        return true;
+      }
+
+      return false;
     }
   }
 
