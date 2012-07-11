@@ -103,6 +103,14 @@ namespace CLIMenu
     /// <para>Enter</para>
     /// </summary>
     public event onOtherButtonHandler onOtherButton;
+    /// <summary>
+    /// This event is fired after clearing the screen, but before rendering begins.
+    /// </summary>
+    public event PreRenderHandler PreRender;
+    /// <summary>
+    /// This event is fired after rendering.
+    /// </summary>
+    public event PostRenderHandler PostRender;
 
     private bool m_exiting = false;
     private Size m_size = new Size();
@@ -315,6 +323,9 @@ namespace CLIMenu
 
       Console.Clear();
 
+      if ( PreRender != null )
+        PreRender( this );
+
       DrawBorder();
       if( !m_isScrolling )
       {
@@ -324,6 +335,9 @@ namespace CLIMenu
         DrawScrollingItems();
         DrawScrollBar();
       }
+
+      if ( PostRender != null )
+        PostRender( this );
     }
 
     private void DrawScrollBar()
@@ -483,6 +497,10 @@ namespace CLIMenu
   public delegate void MenuItemClickedEventHandler( MenuItem item, ConsoleKeyInfo key );
 
   public delegate void onOtherButtonHandler( Menu sender, onOtherButtonHandlerArgs args );
+
+  public delegate void PreRenderHandler( Menu sender );
+
+  public delegate void PostRenderHandler( Menu sender );
 
   public class onOtherButtonHandlerArgs
   {
