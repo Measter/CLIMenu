@@ -83,6 +83,10 @@ namespace CLIMenu
       set;
     }
     /// <summary>
+    /// The character used to indicate the scrollbar postion.
+    /// </summary>
+    public Char ScrollbarCharacter { get; set; }
+    /// <summary>
     /// A list of item indices that should be skipped over.
     /// </summary>
     public List<int> BannedIndices
@@ -121,6 +125,7 @@ namespace CLIMenu
 
       BorderChars = new[] { '\u2554', '\u2557', '\u255D', '\u255A', '\u2550', '\u2551' };
       SelectionIndicator = '*';
+      ScrollbarCharacter = '|';
 
       Items = new MenuItemCollection();
       BannedIndices = new List<int>();
@@ -329,7 +334,7 @@ namespace CLIMenu
       c = a * range;
 
       Console.SetCursorPosition( m_size.Width - BORDER_WIDTH, (int)c + BORDER_WIDTH );
-      Console.Write( "|" );
+      Console.Write( ScrollbarCharacter );
     }
 
     private void DrawScrollingItems()

@@ -36,10 +36,12 @@ namespace CLIMenuExample
 
       m_scrollingDemo.MaxSize = new Size( 80, 15 );
 
-      for( int i = 0; i < 20; i++ )
+      for ( int i = 0; i < 20; i++ )
         m_scrollingDemo.Items.Add( new MenuItem( "Item " + i ) );
 
       m_scrollingDemo.BannedIndices.AddRange( new[] { 2, 3, 5, 6 } );
+
+      m_scrollingDemo.ScrollbarCharacter = '+';
     }
 
     private static void SetupListDemo()
