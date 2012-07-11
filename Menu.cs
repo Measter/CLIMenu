@@ -182,8 +182,8 @@ namespace CLIMenu
 
       //Find the longest item name.
       foreach( MenuItem item in Items )
-        if( item.Name.Length > longestItemLength )
-          longestItemLength = item.Name.Length;
+        if( item.ToString().Length > longestItemLength )
+          longestItemLength = item.ToString().Length;
 
       //If showing the selected item, add 2 characters to give room for the indicator.
       if( ShowSelected )
@@ -372,7 +372,7 @@ namespace CLIMenu
       else
         sb.Append( " " );
 
-      sb.Append( Items[i].Name );
+      sb.Append( Items[i].ToString() );
 
       //Check the length of the name to see if it needs clipping.
       if( sb.Length > m_size.Width - 5 )
@@ -456,61 +456,18 @@ namespace CLIMenu
   /// <summary>
   /// A menu item for use in the Menu object.
   /// </summary>
-  public class MenuItem
-  {
-    public override string ToString()
-    {
-      return string.Format( "Name: {0}", Name );
-    }
-
-    /// <summary>
-    /// The name of the item. This is the text displayed in a menu.
-    /// </summary>
-    public string Name
-    {
-      get;
-      set;
-    }
-
-    /// <summary>
-    /// Stores any custom data that is needed.
-    /// </summary>
-    public Dictionary<string, object> CustomData
-    {
-      get;
-      private set;
-    }
-
+  public abstract class MenuItem
+  {                  
     /// <summary>
     /// This event will fire when the user presses the Enter button on this event.
     /// </summary>
     public event MenuItemClickedEventHandler onClick;
-
-    /// <summary>
-    /// Creates a menu item.
-    /// </summary>
-    /// <param name="name">The name of the item.</param>
-    public MenuItem( string name )
-    {
-      CustomData = new Dictionary<string, object>();
-      Name = name;
-    }
-    /// <summary>
-    /// Creates a menu item.
-    /// </summary>
-    /// <param name="name">The name of the item.</param>
-    /// <param name="click">The method used to handle input.</param>
-    public MenuItem( string name, MenuItemClickedEventHandler click )
-      : this( name )
-    {
-      onClick += click;
-    }
-
+    
     /// <summary>
     /// Fires the onClick event.
     /// </summary>
     /// <param name="key">The key used to fire the event.</param>
-    public virtual void FireClick( ConsoleKeyInfo key )
+    public void FireClick( ConsoleKeyInfo key )
     {
       if( onClick != null )
         onClick( this, key );

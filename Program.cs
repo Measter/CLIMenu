@@ -10,7 +10,7 @@ namespace CLIMenuExample
   class Program
   {
     private static Menu m_mainMenu, m_listDemoMenu, m_sumMenu, m_scrollingDemo;
-    private static MenuItem First, Second, Sum;
+    private static SumItem First, Second, Sum;
 
     static void Main( string[] args )
     {
@@ -36,8 +36,8 @@ namespace CLIMenuExample
 
       m_scrollingDemo.MaxSize = new Size( 80, 15 );
 
-      for ( int i = 0; i < 20; i++ )
-        m_scrollingDemo.Items.Add( new MenuItem( "Item " + i ) );
+      for( int i = 0; i < 20; i++ )
+        m_scrollingDemo.Items.Add( new ListItem( "Item " + i ) );
 
       m_scrollingDemo.BannedIndices.AddRange( new[] { 2, 3, 5, 6 } );
 
@@ -54,7 +54,7 @@ namespace CLIMenuExample
       m_listDemoMenu.MaxSize = new Size( 21, 18 );
 
       for( int i = 0; i < 10; i++ )
-        m_listDemoMenu.Items.Add( new MenuItem( "Demo List Item " + i ) );
+        m_listDemoMenu.Items.Add( new ListItem( "Demo List Item " + i ) );
 
       //Setting a custom border.
       m_listDemoMenu.BorderChars = new[] { '+', '+', '+', '+', '-', '|' };
@@ -65,9 +65,9 @@ namespace CLIMenuExample
       //For the items in this menu, we'll specify the method to handle button presses  
       //for it.
       m_mainMenu = new Menu( "Main Menu" );
-      m_mainMenu.Items.Add( new MenuItem( "List Demo", MainMenu_StarTrek_Click ) );
-      m_mainMenu.Items.Add( new MenuItem( "Sum Menu", MainMenu_Sum_Click ) );
-      m_mainMenu.Items.Add( new MenuItem( "Scrolling List Demo", MainMenu_Scrolling_Click ) );
+      m_mainMenu.Items.Add( new ListItem( "List Demo", MainMenu_ListDemo_Click ) );
+      m_mainMenu.Items.Add( new ListItem( "Sum Menu", MainMenu_Sum_Click ) );
+      m_mainMenu.Items.Add( new ListItem( "Scrolling List Demo", MainMenu_Scrolling_Click ) );
     }
 
     private static void MainMenu_Scrolling_Click( MenuItem item, ConsoleKeyInfo key )
@@ -79,21 +79,21 @@ namespace CLIMenuExample
     {
       m_sumMenu = new Menu( "Sum Menu" );
 
-      m_sumMenu.Items.Add( new MenuItem( "Press Left or Right to change values." ) );
-      m_sumMenu.Items.Add( new MenuItem( "" ) );
+      m_sumMenu.Items.Add( new ListItem( "Press Left or Right to change values." ) );
+      m_sumMenu.Items.Add( new ListItem( "" ) );
 
-      First = new MenuItem( "First Number: 2" );
-      First.CustomData.Add( "value", 2 );
+      First = new SumItem( "First Number: " );
+      First.Value= 2 ;
       m_sumMenu.Items.Add( First );
 
-      Second = new MenuItem( "Second Number: 3" );
-      Second.CustomData.Add( "value", 3 );
+      Second = new SumItem( "Second Number: " );
+      Second.Value = 3;
       m_sumMenu.Items.Add( Second );
 
-      m_sumMenu.Items.Add( new MenuItem( "---" ) );
+      m_sumMenu.Items.Add( new ListItem( "---" ) );
 
-      Sum = new MenuItem( "Sum: 5" );
-      Sum.CustomData.Add( "value", 5 );
+      Sum = new SumItem( "Sum: " );
+      Sum.Value = 5;
       m_sumMenu.Items.Add( Sum );
 
       //Setting the indices of the menu to skip over.
@@ -114,35 +114,21 @@ namespace CLIMenuExample
         return;
 
       //Next we get the current menu item.
-      MenuItem cur = args.MenuItem;
+      SumItem cur = (SumItem)args.MenuItem;
 
       //Now we check if the input key is one we want to handle.
       if( args.Key.Key != ConsoleKey.LeftArrow &&
            args.Key.Key != ConsoleKey.RightArrow )
         return;
 
-      //Getting the stored value.
-      int temp = (int)cur.CustomData["value"];
-
       //Now we handle the input.
-      if( args.Key.Key == ConsoleKey.LeftArrow )
-      {
-        temp--;
-        //Set the new name of the item.
-        cur.Name = cur.Name.Substring( 0, cur.Name.IndexOf( ':' ) + 2 ) + temp.ToString();
-        cur.CustomData["value"] = temp;
-      }
+      if ( args.Key.Key == ConsoleKey.LeftArrow )
+        cur.Value--;
 
-      if( args.Key.Key == ConsoleKey.RightArrow )
-      {
-        temp++;
-        //Set the new name of the item.
-        cur.Name = cur.Name.Substring( 0, cur.Name.IndexOf( ':' ) + 2 ) + temp.ToString();
-        cur.CustomData["value"] = temp;
-      }
+      if ( args.Key.Key == ConsoleKey.RightArrow )
+        cur.Value++;
 
-      temp = (int)First.CustomData["value"] + (int)Second.CustomData["value"];
-      Sum.Name = Sum.Name.Substring( 0, Sum.Name.IndexOf( ':' ) + 2 ) + temp.ToString();
+      Sum.Value = First.Value + Second.Value;
     }
 
     private static void MainMenu_Sum_Click( MenuItem item, ConsoleKeyInfo key )
@@ -152,9 +138,54 @@ namespace CLIMenuExample
 
     //This function handles the user pressing Enter while this menu item is selected.
     //In this case, we're just showing another menu.
-    private static void MainMenu_StarTrek_Click( MenuItem item, ConsoleKeyInfo key )
+    private static void MainMenu_ListDemo_Click( MenuItem item, ConsoleKeyInfo key )
     {
       m_listDemoMenu.Show();
+    }
+  }
+
+  public class SumItem : MenuItem
+  {
+    public string Text { get; set; }
+    public int Value { get; set; }
+
+    public SumItem( string text )
+    {
+      Text = text;
+    }
+
+    public override string ToString()
+    {
+      return Text + Value;
+    }
+  }
+
+  public class ListItem : MenuItem
+  {
+    public string Name
+    {
+      get;
+      set;
+    }
+
+    public ListItem( string name )
+    {
+      Name = name;
+    }
+
+    public ListItem()
+    {
+    }
+
+    public ListItem( string name, MenuItemClickedEventHandler clickEvent )
+    {
+      Name = name;
+      onClick += clickEvent;
+    }
+
+    public override string ToString()
+    {
+      return Name;
     }
   }
 }
