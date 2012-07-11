@@ -53,6 +53,10 @@ namespace CLIMenu
       set;
     }
     /// <summary>
+    /// Sets whether the window should be resized on the next render cycle.
+    /// </summary>
+    public bool ForceResize { get; set; }
+    /// <summary>
     /// The list of items in the menu.
     /// </summary>
     public MenuItemCollection Items
@@ -110,7 +114,6 @@ namespace CLIMenu
 
     private bool m_exiting = false;
     private Size m_size = new Size();
-    private bool m_isShown = false;  //Sets whether the window should be resized when rendering.
     private bool m_isScrolling = false;
 
     private int[] m_firstLast = new int[2];  //The first and last item IDs for a scrolling menu.
@@ -126,6 +129,7 @@ namespace CLIMenu
     public Menu()
     {
       ShowSelected = true;
+      ForceResize = true;
 
       BorderChars = new[] { '\u2554', '\u2557', '\u255D', '\u255A', '\u2550', '\u2551' };
       SelectionIndicator = '*';
@@ -229,11 +233,10 @@ namespace CLIMenu
           break;
         case ConsoleKey.Escape:
           m_exiting = true;
-          m_isShown = false;
+          ForceResize = true;
           break;
         default:
-          if( Items[SelectedIndex].FireKeyPress( this, cin ) )
-            m_isShown = false;  //If the event fires, the window may need resizing.
+          Items[SelectedIndex].FireKeyPress( this, cin );
           break;
       }
     }
@@ -298,7 +301,7 @@ namespace CLIMenu
     {
       //The screen should only be resized if control has been moved away from
       //the menu.
-      if( !m_isShown )
+      if( ForceResize )
       {
         //Setting the window size.
         Console.SetWindowSize( 1, 1 );
@@ -309,7 +312,7 @@ namespace CLIMenu
           Console.Title = Name;
         Console.CursorVisible = false;
 
-        m_isShown = true;
+        ForceResize = false;
       }
 
       Console.Clear();

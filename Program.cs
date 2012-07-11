@@ -60,34 +60,6 @@ namespace CLIMenuExample
       m_listDemoMenu.BorderChars = new[] { '+', '+', '+', '+', '-', '|' };
     }
 
-    private static void SetupMainMenu()
-    {
-      //For the items in this menu, we'll specify the method to handle button presses  
-      //for it.
-      m_mainMenu = new Menu( "Main Menu" );
-      m_mainMenu.Items.Add( new ListItem( "List Demo", MainMenu_ListDemo_Click ) );
-      m_mainMenu.Items.Add( new ListItem( "Sum Menu", MainMenu_Sum_Click ) );
-      m_mainMenu.Items.Add( new ListItem( "Scrolling List Demo", MainMenu_Scrolling_Click ) );
-    }
-
-    private static void MainMenu_Scrolling_Click( Menu sender, onKeyPressArgs args )
-    {
-      if( args.Key.Key == ConsoleKey.Enter )
-        m_scrollingDemo.Show();
-    }
-
-    private static void MainMenu_Sum_Click( Menu sender, onKeyPressArgs args )
-    {
-      if( args.Key.Key == ConsoleKey.Enter )
-        m_sumMenu.Show();
-    }
-
-    private static void MainMenu_ListDemo_Click( Menu sender, onKeyPressArgs args )
-    {
-      if ( args.Key.Key == ConsoleKey.Enter )
-        m_listDemoMenu.Show();
-    }
-
     private static void SetupSumMenu()
     {
       m_sumMenu = new Menu( "Sum Menu" );
@@ -102,12 +74,13 @@ namespace CLIMenuExample
 
       Second = new SumItem( "Second Number: " );
       Second.Value = 3;
+      Second.onKeyPress += SumItem_onKeyPress;
       m_sumMenu.Items.Add( Second );
 
       m_sumMenu.Items.Add( new ListItem( "---" ) );
 
       Sum = new SumItem( "Sum: " );
-      Sum.Value = 5;
+      Sum.Value = First.Value + Second.Value;
       m_sumMenu.Items.Add( Sum );
 
       //Setting the indices of the menu to skip over.
@@ -115,6 +88,49 @@ namespace CLIMenuExample
 
       //We'll set a custom selection indicator for this menu.
       m_sumMenu.SelectionIndicator = '>';
+    }
+
+    private static void SetupMainMenu()
+    {
+      //For the items in this menu, we'll specify the method to handle button presses  
+      //for it.
+      m_mainMenu = new Menu( "Main Menu" );
+      m_mainMenu.Items.Add( new ListItem( "List Demo", MainMenu_ListDemo_Click ) );
+      m_mainMenu.Items.Add( new ListItem( "Sum Menu", MainMenu_Sum_Click ) );
+      m_mainMenu.Items.Add( new ListItem( "Scrolling List Demo", MainMenu_Scrolling_Click ) );
+    }
+
+    private static void MainMenu_Scrolling_Click( Menu sender, onKeyPressArgs args )
+    {
+      if( args.Key.Key == ConsoleKey.Enter )
+      {
+        //Because the window may be resized when showing the next menu,
+        //the main menu should force a resize on the next cycle.
+        sender.ForceResize = true;
+        m_scrollingDemo.Show();
+      }
+    }
+
+    private static void MainMenu_Sum_Click( Menu sender, onKeyPressArgs args )
+    {
+      if( args.Key.Key == ConsoleKey.Enter )
+      {
+        //Because the window may be resized when showing the next menu,
+        //the main menu should force a resize on the next cycle.
+        sender.ForceResize = true;
+        m_sumMenu.Show();
+      }
+    }
+
+    private static void MainMenu_ListDemo_Click( Menu sender, onKeyPressArgs args )
+    {
+      if( args.Key.Key == ConsoleKey.Enter )
+      {
+        //Because the window may be resized when showing the next menu,
+        //the main menu should force a resize on the next cycle.
+        sender.ForceResize = true;
+        m_listDemoMenu.Show();
+      }
     }
 
     private static void SumItem_onKeyPress( Menu sender, onKeyPressArgs args )
