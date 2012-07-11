@@ -1,0 +1,17 @@
+﻿CLIMenu is a menu system for command line applications.
+
+The menu will resize itself to the required screen space when rendering, but a
+minimum and maximum size may be specified. If the number of items is longer than
+the maximum height, a scrolling list will be used. If the item text length is
+longer than the maximum width, it will be truncated with ellipses.
+
+Included with the system is an abstract MenuItem class, which all menu items
+should inherit from. This class ensures that the item objects have the proper
+event setup. When items are drawn on a menu, the .ToString() function is called,
+so that's where you should program the output.
+
+Additionally, you can specify the border characters, selection indicator, and the
+scroll bar character. You can also choose to hide the selection indicator.
+
+The menu also has PreRender and PostRender events for when you need to render
+Additional data to the screen.
