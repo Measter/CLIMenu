@@ -106,6 +106,8 @@ namespace CLIMenu
     private bool m_isScrolling = false;
 
     private int[] m_firstLast = new int[2];  //The first and last item IDs for a scrolling menu.
+    private int m_maxItems;
+    private int m_indexChange = 0;  //Keeps track of how much the item index has changed.
 
     private const int BORDER_WIDTH = 3;
     private const int DOUBLE_BORDER_WIDTH = BORDER_WIDTH * 2;
@@ -149,6 +151,15 @@ namespace CLIMenu
         SelectedIndex++;
         if( SelectedIndex == Items.Count )
           return;
+      }
+
+      //Recalculate the maximum items for scrolling, and reset the FirstLast position.
+      if( m_isScrolling )
+      {
+        m_maxItems = m_size.Height - ( DOUBLE_BORDER_WIDTH + 1 );
+
+        m_firstLast[0] = SelectedIndex;
+        m_firstLast[1] = SelectedIndex + m_maxItems;
       }
 
       //Input and draw loop.
@@ -216,7 +227,7 @@ namespace CLIMenu
           Items[SelectedIndex].FireClick( cin );
           break;
         default:
-          if ( onOtherButton != null )
+          if( onOtherButton != null )
             onOtherButton( this, new onOtherButtonHandlerArgs( Items[SelectedIndex], cin ) );
           break;
       }
@@ -246,6 +257,8 @@ namespace CLIMenu
           break;
         }
       }
+
+      m_indexChange = SelectedIndex - prev;
     }
 
     private void HandleUp()
@@ -272,6 +285,8 @@ namespace CLIMenu
           break;
         }
       }
+
+      m_indexChange = SelectedIndex - prev;
     }
 
     private void DrawScreen()
@@ -319,7 +334,12 @@ namespace CLIMenu
 
     private void DrawScrollingItems()
     {
-      SetFirstLast();
+      //Get the first and last item indices to show.
+      if( SelectedIndex > m_firstLast[1] || SelectedIndex < m_firstLast[0] )
+      {
+        m_firstLast[0] += m_indexChange;
+        m_firstLast[1] += m_indexChange;
+      }
 
       int drawLine = BORDER_WIDTH;
       for( int i = 0; i < Items.Count; i++ )
@@ -329,33 +349,6 @@ namespace CLIMenu
           DrawItem( drawLine, i );
 
           drawLine++;
-        }
-      }
-    }
-
-    private void SetFirstLast()
-    {
-      int maxItems = m_size.Height - ( DOUBLE_BORDER_WIDTH + 1 );
-
-      if( SelectedIndex == 0 )
-      {
-        m_firstLast[0] = 0;
-        m_firstLast[1] = maxItems;
-      } else if( SelectedIndex == Items.Count - 1 )
-      {
-        m_firstLast[0] = SelectedIndex - maxItems;
-        m_firstLast[1] = SelectedIndex;
-      } else
-      {
-        if( SelectedIndex > m_firstLast[1] - 1 )
-        {
-          m_firstLast[0]++;
-          m_firstLast[1]++;
-        }
-        if( SelectedIndex < m_firstLast[0] + 1 )
-        {
-          m_firstLast[0]--;
-          m_firstLast[1]--;
         }
       }
     }
