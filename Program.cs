@@ -98,6 +98,9 @@ namespace CLIMenuExample
       m_mainMenu.Items.Add( new ListItem( "List Demo", MainMenu_ListDemo_Click ) );
       m_mainMenu.Items.Add( new ListItem( "Sum Menu", MainMenu_Sum_Click ) );
       m_mainMenu.Items.Add( new ListItem( "Scrolling List Demo", MainMenu_Scrolling_Click ) );
+
+      m_mainMenu.InvertedIndicator = true;
+      m_mainMenu.Foreground = ConsoleColor.White;
     }
 
     private static void MainMenu_Scrolling_Click( Menu sender, onKeyPressArgs args )
@@ -106,7 +109,7 @@ namespace CLIMenuExample
       {
         //Because the window may be resized when showing the next menu,
         //the main menu should force a resize on the next cycle.
-        sender.ForceResize = true;
+        sender.ForceReset = true;
         m_scrollingDemo.Show();
       }
     }
@@ -117,7 +120,7 @@ namespace CLIMenuExample
       {
         //Because the window may be resized when showing the next menu,
         //the main menu should force a resize on the next cycle.
-        sender.ForceResize = true;
+        sender.ForceReset = true;
         m_sumMenu.Show();
       }
     }
@@ -128,7 +131,7 @@ namespace CLIMenuExample
       {
         //Because the window may be resized when showing the next menu,
         //the main menu should force a resize on the next cycle.
-        sender.ForceResize = true;
+        sender.ForceReset = true;
         m_listDemoMenu.Show();
       }
     }

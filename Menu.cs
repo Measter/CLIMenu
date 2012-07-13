@@ -55,7 +55,11 @@ namespace CLIMenu
     /// <summary>
     /// Sets whether the window should be resized on the next render cycle.
     /// </summary>
-    public bool ForceResize { get; set; }
+    public bool ForceReset
+    {
+      get;
+      set;
+    }
     /// <summary>
     /// The list of items in the menu.
     /// </summary>
@@ -87,6 +91,10 @@ namespace CLIMenu
       set;
     }
     /// <summary>
+    /// Whether the selection should be indicated by reversing the colours or with a character.
+    /// </summary>
+    public bool InvertedIndicator { get; set; }
+    /// <summary>
     /// The character used to indicate the scrollbar postion.
     /// </summary>
     public Char ScrollbarCharacter
@@ -101,6 +109,22 @@ namespace CLIMenu
     {
       get;
       private set;
+    }
+    /// <summary>
+    /// The foreground colour used for rendering.
+    /// </summary>
+    public ConsoleColor Foreground
+    {
+      get;
+      set;
+    }
+    /// <summary>
+    /// The background colour used for rendering.
+    /// </summary>
+    public ConsoleColor Background
+    {
+      get;
+      set;
     }
 
     /// <summary>
@@ -129,11 +153,14 @@ namespace CLIMenu
     public Menu()
     {
       ShowSelected = true;
-      ForceResize = true;
+      ForceReset = true;
 
       BorderChars = new[] { '\u2554', '\u2557', '\u255D', '\u255A', '\u2550', '\u2551' };
       SelectionIndicator = '*';
       ScrollbarCharacter = '|';
+      InvertedIndicator = false;
+      Background = ConsoleColor.Black;
+      Foreground = ConsoleColor.Gray;
 
       Items = new MenuItemCollection();
       BannedIndices = new List<int>();
@@ -194,7 +221,7 @@ namespace CLIMenu
           longestItemLength = item.ToString().Length;
 
       //If showing the selected item, add 2 characters to give room for the indicator.
-      if( ShowSelected )
+      if( ShowSelected && !InvertedIndicator )
         m_size.Width = longestItemLength + DOUBLE_BORDER_WIDTH + 2;
       else
         m_size.Width = longestItemLength + DOUBLE_BORDER_WIDTH;
@@ -233,7 +260,7 @@ namespace CLIMenu
           break;
         case ConsoleKey.Escape:
           m_exiting = true;
-          ForceResize = true;
+          ForceReset = true;
           break;
         default:
           Items[SelectedIndex].FireKeyPress( this, cin );
@@ -301,7 +328,7 @@ namespace CLIMenu
     {
       //The screen should only be resized if control has been moved away from
       //the menu.
-      if( ForceResize )
+      if( ForceReset )
       {
         //Setting the window size.
         Console.SetWindowSize( 1, 1 );
@@ -312,7 +339,10 @@ namespace CLIMenu
           Console.Title = Name;
         Console.CursorVisible = false;
 
-        ForceResize = false;
+        Console.ForegroundColor = Foreground;
+        Console.BackgroundColor = Background;
+
+        ForceReset = false;
       }
 
       Console.Clear();
@@ -375,25 +405,39 @@ namespace CLIMenu
 
     private void DrawItem( int drawLine, int i )
     {
+      ConsoleColor fg = Foreground, bg = Background;
+      
       StringBuilder sb = new StringBuilder();
-      if( ShowSelected )
-        sb.Append( i == SelectedIndex && ShowSelected ? " " + SelectionIndicator + " " : "   " );
-      else
-        sb.Append( " " );
+      if( ShowSelected && !InvertedIndicator )
+        sb.Append( i == SelectedIndex && ShowSelected ?  SelectionIndicator + " " : "  " );
 
       sb.Append( Items[i].ToString() );
 
       //Check the length of the name to see if it needs clipping.
-      if( sb.Length > m_size.Width - 5 )
+      if( sb.Length > m_size.Width - DOUBLE_BORDER_WIDTH )
       {
         string t = sb.ToString();
         sb = new StringBuilder();
-        sb.Append( t.Substring( 0, m_size.Width - ( DOUBLE_BORDER_WIDTH + 2 ) ) );
+        sb.Append( t.Substring( 0, m_size.Width - ( DOUBLE_BORDER_WIDTH + BORDER_WIDTH ) ) );
         sb.Append( "..." );
       }
 
-      Console.SetCursorPosition( 2, drawLine );
+      //Need to flip the colours if using an inverted indicator.
+      if ( InvertedIndicator && i == SelectedIndex )
+      {
+        Console.ForegroundColor = Background;
+        Console.BackgroundColor = Foreground;
+      }
+
+      Console.SetCursorPosition( BORDER_WIDTH, drawLine );
       Console.Write( sb.ToString() );
+
+      //Now we need to restore the colours.
+      if( InvertedIndicator && i == SelectedIndex )
+      {
+        Console.ForegroundColor = Foreground;
+        Console.BackgroundColor = Background;
+      }
     }
 
     private void DrawBorder()
