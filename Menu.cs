@@ -61,6 +61,14 @@ namespace CLIMenu
       set;
     }
     /// <summary>
+    /// Exits the menu on the next loop if true;
+    /// </summary>
+    public bool Exit
+    {
+      get;
+      set;
+    }
+    /// <summary>
     /// The list of items in the menu.
     /// </summary>
     public MenuItemCollection Items
@@ -136,7 +144,6 @@ namespace CLIMenu
     /// </summary>
     public event PostRenderHandler PostRender;
 
-    private bool m_exiting = false;
     private Size m_size = new Size();
     private bool m_isScrolling = false;
 
@@ -154,6 +161,8 @@ namespace CLIMenu
     {
       ShowSelected = true;
       ForceReset = true;
+
+      Exit = false;
 
       BorderChars = new[] { '\u2554', '\u2557', '\u255D', '\u255A', '\u2550', '\u2551' };
       SelectionIndicator = '*';
@@ -180,7 +189,7 @@ namespace CLIMenu
     /// </summary>
     public void Show()
     {
-      m_exiting = false;
+      Exit = false;
       SelectedIndex = 0;
 
       SetScreenSize();
@@ -203,7 +212,7 @@ namespace CLIMenu
       }
 
       //Input and draw loop.
-      while( !m_exiting )
+      while( !Exit )
       {
         DrawScreen();
 
@@ -259,7 +268,7 @@ namespace CLIMenu
           HandleDown();
           break;
         case ConsoleKey.Escape:
-          m_exiting = true;
+          Exit = true;
           ForceReset = true;
           break;
         default:
