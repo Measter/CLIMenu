@@ -335,7 +335,7 @@ namespace CLIMenu
         Console.SetBufferSize( m_size.Width, m_size.Height );
         Console.SetWindowSize( m_size.Width, m_size.Height );
 
-        if( Name != String.Empty )
+        if( !string.IsNullOrEmpty( Name ) )
           Console.Title = Name;
         Console.CursorVisible = false;
 
