@@ -414,6 +414,13 @@ namespace CLIMenu
 
     private void DrawItem( int drawLine, int i )
     {
+      //Set the item coordinates when drawn.
+      Items[i].Position.X = BORDER_WIDTH;
+      Items[i].Position.Y = drawLine;
+
+      if( ShowSelected && !InvertedIndicator )
+        Items[i].Position.X += 2;
+      
       ConsoleColor fg = Foreground, bg = Background;
       
       StringBuilder sb = new StringBuilder();
@@ -520,6 +527,22 @@ namespace CLIMenu
   /// </summary>
   public abstract class MenuItem
   {
+    protected MenuItem()
+    {
+      Position = new Coordinates();
+    }
+
+    /// <summary>
+    /// Position of the item when it was last drawn.
+    /// </summary>
+    public Coordinates Position { get; set; }
+
+    public class Coordinates
+    {
+      public int X;
+      public int Y;
+    }
+
     /// <summary>
     /// This event will fire when the user presses the Enter button on this event.
     /// </summary>
